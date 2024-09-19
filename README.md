@@ -1,38 +1,31 @@
 # AI Code Merge
 
-AI Code Merge is a powerful tool designed to concatenate codebases and prepare them for input into AI systems. This project simplifies the process of combining multiple code files from various projects or repositories, making it easier to analyze large codebases or generate comprehensive documentation.
+AI Code Merge is a tool for concatenating codebases and preparing them for input into AI systems. It combines multiple code files from projects or repositories to facilitate codebase analysis or documentation generation.
 
 ## Features
 
 - Concatenate multiple code files into a single file
-- Support for various programming languages
-- Intelligent handling of comments and formatting
-- Customizable output format
-- Command-line interface for scripting and automation
-- User-friendly graphical interface for easy interaction
+- Support for various file types
+- Customizable file inclusion/exclusion
+- Command-line interface
+- Simple graphical user interface (early phase, incomplete)
 
 ## Components
 
-1. `aicodemerge.py`: The core script for merging code files, offering command-line functionality.
-2. `aicodemerge-gui.py`: A graphical user interface wrapper for the AI Code Merge tool, providing an intuitive user experience.
+1. `aicodemerge.py`: Core script for merging code files (CLI functionality)
+2. `aicodemerge-gui.py`: Graphical interface for the AI Code Merge tool (early phase, incomplete)
 
 ## Installation
 
-1. Ensure you have Python 3.6 or later installed on your system.
+1. Ensure Python 3.6 or later is installed.
 
-2. Clone this repository:
+2. Clone the repository:
    ```
    git clone https://github.com/yourusername/ai-code-merge.git
    cd ai-code-merge
    ```
 
-3. (Optional) Create and activate a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
-
-4. Install the required dependencies:
+3. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
@@ -41,58 +34,43 @@ AI Code Merge is a powerful tool designed to concatenate codebases and prepare t
 
 ### Command Line Interface
 
-To use the command-line interface, run:
+Run:
 
 ```
 python aicodemerge.py [options] [file/directory paths]
 ```
 
 Options:
-- `-o, --output`: Specify the output file (default: merged_output.txt)
-- `-r, --recursive`: Recursively process directories
-- `-e, --exclude`: Exclude file patterns (e.g., "*.txt,*.log")
+- `-d, --max-depth`: Maximum depth for directory traversal
+- `-s, --max-size`: Maximum file size in KB to include
+- `-p, --patterns`: File patterns to include
+- `-o, --output`: Specify the output file name
+- `-v, --verbose`: Enable verbose output
+- `-c, --custom`: Use custom configuration mode
 
 Example:
 ```
-python aicodemerge.py -o merged_project.txt -r ./project1 ./project2
+python aicodemerge.py -d 4 -s 100 -p "*.py,*.js" -o output.md ./project
 ```
 
-### Graphical User Interface
+### Graphical User Interface (Early Phase)
 
-To launch the GUI version, simply run:
+The GUI is currently in an early development phase and is incomplete. Basic functionality includes:
 
+Run:
 ```
 python aicodemerge-gui.py
 ```
 
-The GUI allows you to:
-- Select input files or directories
-- Choose output location and filename
-- Set exclusion patterns
-- View a preview of the merged output
+- Select a project folder
+- Process the folder and generate output
 
-## Contributing
-
-We welcome contributions to the AI Code Merge project! Here's how you can help:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-Please ensure your code adheres to our coding standards and includes appropriate tests.
+Note: The GUI version is still under development and may lack features or stability compared to the CLI version.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgements
-
-- Thanks to all contributors who have helped shape AI Code Merge
-- Inspired by the need for efficient code analysis in AI applications
-
 ## Support
 
-If you encounter any issues or have questions, please file an issue on the GitHub repository.
+For issues or questions, please file an issue on the GitHub repository.

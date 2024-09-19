@@ -7,72 +7,85 @@ import datetime
 import re
 
 DEFAULT_EXCLUDE_PATTERNS = [
-    # Existing patterns
-    'node_modules', 'node_modules/**',
-    '.git', '.svn', '.hg',
-    'vendor', 'bower_components', 'jspm_packages',
+    # Git-related 
+    '.git',  # Exclude the entire .git directory
+    '.git/*',  # Exclude all direct children of .git
+    '**/.git',  # Exclude .git directories at any depth
+    '**/.git/**',  # Exclude all contents of any .git directory at any depth
+
+    # Version Control Systems
+    '.svn', '.hg', '.gitignore', '.gitattributes',
+
+    # Dependency Directories
+    'node_modules', 'node_modules/**', 'vendor', 'bower_components', 'jspm_packages',
+
+    # Build Outputs
+    'build', 'dist', 'out', 'target', '.next/**', 'out/**',
+
+    # Compiled Files
     '*.pyc', '*.pyo', '*.mo', '*.class', '*.dll', '*.exe', '*.o', '*.obj', '*.so',
-    '*.log', '*.sql', '*.sqlite',
-    '.DS_Store', 'Thumbs.db', 'desktop.ini',
-    'package-lock.json', 'yarn.lock', 'composer.lock',
-    '.cache', '.tmp', '.temp', '.sass-cache',
-    'build', 'dist', 'out', 'target',
-    '.vscode', '.idea', '*.swp', '*.swo', '*.sublime-*',
-    'coverage', '.nyc_output', '.pytest_cache',
+    '*.dylib', '*.ncb', '*.sdf', '*.suo', '*.pdb', '*.idb', '.com', '*.exe', '*.o',
+    '*.bundle.js', '*.chunk.js',
+
+    # Logs and Databases
+    '*.log', '*.sql', '*.sqlite', '*.sqlite3', '*.sqlite3-journal',
+
+    # OS Generated Files
+    '.DS_Store', 'Thumbs.db', 'desktop.ini', '._*', '.Spotlight-V100', '.Trashes',
+    'ehthumbs.db', 'ehthumbs_vista.db',
+
+    # Package Manager Files
+    'package-lock.json', 'yarn.lock', 'composer.lock', 'Gemfile.lock',
+
+    # Cache and Temporary Files
+    '.cache', '.tmp', '.temp', '.sass-cache', '__pycache__', '*.py[cod]',
+    '.eslintcache', '.stylelintcache', '.phpunit.result.cache',
+
+    # IDE and Editor Files
+    '.vscode', '.idea', '*.swp', '*.swo', '*.sublime-*', '*.code-workspace',
+    '.project', '.classpath', '.settings/', '*.launch', '.history/',
+
+    # Test and Coverage
+    'coverage', '.nyc_output', '.pytest_cache', '.tox', '.nox',
+    'nosetests.xml', 'coverage.xml',
+
+    # Documentation
     'docs', '*.md', '*.rst', '*.txt',
-    '*.jpg', '*.jpeg', '*.png', '*.gif', '*.ico', '*.mov', '*.mp4', '*.mp3', '*.flv', '*.fla',
-    '*.zip', '*.tar.gz', '*.rar',
+
+    # Media and Archives
+    '*.jpg', '*.jpeg', '*.png', '*.gif', '*.ico', '*.mov', '*.mp4', '*.mp3',
+    '*.flv', '*.fla', '*.zip', '*.tar.gz', '*.rar',
+
+    # Configuration and Environment Files
     '.env', '.env.*', 'config.json', 'settings.json',
 
-    # Next.js specific patterns
-    '.next/**',  # Next.js build output
-    'out/**',    # Next.js export output
-    '*.vercel',  # Vercel deployment files
-    '.vercel',   # Vercel related files
-    'next-env.d.ts',  # Next.js TypeScript declarations
-    '.eslintrc*',  # ESLint configuration
-    'next.config.js',  # Next.js configuration file
-    'next-sitemap.config.js',  # Next.js sitemap configuration
-    'public/**',  # Public assets folder, consider removing if you want to include these
+    # Next.js and React
+    '.vercel', 'next-env.d.ts', '.eslintrc*', 'next.config.js', 'next-sitemap.config.js',
+    'public/**', '.pnp.*', '*.pnp.js',
 
-    # React and JavaScript related patterns
-    'build/**',  # React build output
-    'coverage/**',  # Test coverage reports
-    '*.bundle.js',  # Bundled JavaScript files
-    '*.chunk.js',  # Chunked JavaScript files
-    'npm-debug.log*',  # npm debug logs
-    'yarn-debug.log*',  # Yarn debug logs
-    'yarn-error.log*',  # Yarn error logs
-    '.pnp.*',  # Plug'n'Play related files
-    '*.pnp.js',  # Plug'n'Play JavaScript files
-    '.cache/**',  # Cache directories
-    '.env.local',  # Local environment variables
-    '.env.development.local',  # Development environment variables
-    '.env.test.local',  # Test environment variables
-    '.env.production.local',  # Production environment variables
-
-    # SwiftUI and iOS development
+    # iOS and macOS Development
     '*.xcodeproj', '*.xcworkspace', '*.pbxproj', '*.mode1v3', '*.mode2v3', '*.perspectivev3',
     '*.xcuserstate', '*.xccheckout', '*.moved-aside', '*.hmap', '*.ipa', '*.dSYM.zip', '*.dSYM',
     'timeline.xctimeline', 'playground.xcworkspace', '.build/', 'DerivedData/', '*.playgroundbook',
+    'Pods/', 'Carthage/Build',
 
-    # Android development
+    # Android Development
     '*.iml', '.gradle', 'local.properties', '.idea/caches', '.idea/libraries', '.idea/modules.xml',
     '.idea/workspace.xml', '.idea/navEditor.xml', '.idea/assetWizardSettings.xml', '.externalNativeBuild',
     '.cxx', '*.apk', '*.aab', '*.ap_', '*.dex',
 
     # Ruby on Rails
-    '*.rbc', 'capybara-*.html', '.rspec', 'db/*.sqlite3', 'db/*.sqlite3-journal', 'public/system',
-    'coverage/', 'spec/tmp', '**.orig', 'rerun.txt', 'pickle-email-*.html', '.bundle', 'vendor/bundle',
-    'log/*', 'tmp/*', 'storage/*', '.byebug_history', 'config/master.key', 'config/credentials.yml.enc',
+    '*.rbc', 'capybara-*.html', '.rspec', 'public/system', 'spec/tmp', '**.orig',
+    'rerun.txt', 'pickle-email-*.html', '.bundle', 'vendor/bundle', 'log/*', 'tmp/*',
+    'storage/*', '.byebug_history', 'config/master.key', 'config/credentials.yml.enc',
 
     # Java
     '*.class', '*.war', '*.ear', '*.jar', 'hs_err_pid*', '.mtj.tmp/',
 
-    # Python (additional)
-    '*.egg-info/', 'dist/', 'build/', '*.egg', 'pip-log.txt', 'pip-delete-this-directory.txt',
-    '.tox/', '.coverage', '.coverage.*', '.cache', 'nosetests.xml', 'coverage.xml', '*.cover',
-    '*.py,cover', '.hypothesis/', '.pytest_cache/', 'pytestdebug.log', '.python-version',
+    # Python
+    '*.egg-info/', 'pip-log.txt', 'pip-delete-this-directory.txt', '.tox/',
+    '.coverage', '.coverage.*', '.cache', '*.cover', '*.py,cover', '.hypothesis/',
+    'pytestdebug.log', '.python-version', '.mypy_cache', '.dmypy.json', '.pyre/',
 
     # Go
     '*.exe', '*.test', '*.prof', '*.out',
@@ -98,6 +111,18 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
     # Elm
     'elm-stuff/', '*.elmo', '*.elmi',
+
+    # Additional Patterns
+    '.ropeproject', '.spyderproject', '.spyproject', '.webassets-cache', '.scrapy',
+    'celerybeat-schedule', 'celerybeat.pid', '*.sage.py', '.venv', 'env/', 'venv/', 'ENV/',
+    '.tern-port', '.vscode-test', '.yarn-integrity', '.expo/', '.expo-shared/',
+    '*.jks', '*.keystore', '*.mobileprovision', '*.provisionprofile',
+    '.sonar', '.scannerwork', '.terraform', '*.tfstate', '*.tfstate.*', '.vagrant',
+    '*.bak', '*.gho', '*.ori', '*.orig', '.Trash-*', '$RECYCLE.BIN/', 'System Volume Information',
+    '*.lnk', '.fseventsd', '.apdisk', '*.patch', '*.diff', '*.kicad_pcb-bak', '*.sch-bak',
+    '~$*.doc*', '~$*.xls*', '~$*.ppt*', '*.~vsd*', '.~lock.*#', 'Thumbs.db:encryptable',
+    '*.stackdump', '[Dd]esktop.ini', '*.code-snippets', '.atom/', '.tags', '.tags_sorted_by_file',
+    '.gemtags', 'tags', 'TAGS', 'cscope.*', '*.rsuser', '*.pid', '*.seed', '*.pid.lock',
 ]
 
 def parse_arguments():

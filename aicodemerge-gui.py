@@ -3,8 +3,8 @@
 import sys
 import datetime
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFileDialog, QProgressBar, QMessageBox, QLineEdit, QSpinBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFileDialog, QProgressBar, QMessageBox, QLineEdit, QSpinBox, QTextEdit
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent
 
 # Import only necessary functions from the original script
@@ -148,6 +148,8 @@ def list_directory(dir_path, gitignore_matcher, patterns, prefix="", current_dep
     return structure
 
 class DropZone(QLabel):
+    folder_dropped = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.setAlignment(Qt.AlignCenter)
@@ -169,21 +171,40 @@ class DropZone(QLabel):
 
     def dropEvent(self, event: QDropEvent):
         files = [u.toLocalFile() for u in event.mimeData().urls()]
-        if files:
-            self.parent().process_folder(files[0])
+        if files and os.path.isdir(files[0]):
+            self.folder_dropped.emit(files[0])
+
+    def set_folder(self, folder):
+        self.setText(f"Selected Folder:\n{folder}")
+
+    def clear_folder(self):
+        self.setText('\n\n Drop Project Folder Here \n\n')
 
 class AICodeMergeGUI(QWidget):
     def __init__(self):
         super().__init__()
+        self.custom_output_file = None
+        self.selected_folder = None
         self.initUI()
 
     def initUI(self):
         layout = QVBoxLayout()
 
         self.dropzone = DropZone()
+        self.dropzone.folder_dropped.connect(self.set_folder)
         layout.addWidget(self.dropzone)
 
-        # Add input fields
+        folder_buttons_layout = QHBoxLayout()
+        self.select_folder_button = QPushButton('Select Another Folder')
+        self.select_folder_button.clicked.connect(self.select_folder)
+        folder_buttons_layout.addWidget(self.select_folder_button)
+
+        self.remove_folder_button = QPushButton('Remove Folder')
+        self.remove_folder_button.clicked.connect(self.remove_folder)
+        folder_buttons_layout.addWidget(self.remove_folder_button)
+
+        layout.addLayout(folder_buttons_layout)
+
         form_layout = QVBoxLayout()
 
         # Max depth
@@ -214,33 +235,68 @@ class AICodeMergeGUI(QWidget):
         # Exclude patterns
         exclude_layout = QHBoxLayout()
         exclude_layout.addWidget(QLabel('Exclude Patterns:'))
-        self.exclude_input = QLineEdit(','.join(DEFAULT_EXCLUDE_PATTERNS[:5]) + ',...')  # Show first 5 patterns
+        self.exclude_input = QTextEdit()
+        self.exclude_input.setPlainText('\n'.join(DEFAULT_EXCLUDE_PATTERNS))
+        self.exclude_input.setToolTip("Click to edit. Use 'Reset to Defaults' to restore original patterns.")
+        self.exclude_input.setFixedHeight(100)  # Adjust this value to fit 5 lines
         exclude_layout.addWidget(self.exclude_input)
         self.reset_exclude_button = QPushButton('Reset to Defaults')
         self.reset_exclude_button.clicked.connect(self.reset_exclude_patterns)
         exclude_layout.addWidget(self.reset_exclude_button)
         form_layout.addLayout(exclude_layout)
 
+        # Add output file selection
+        output_layout = QHBoxLayout()
+        output_layout.addWidget(QLabel('Output File:'))
+        self.output_file_input = QLineEdit()
+        self.output_file_input.setPlaceholderText('Default: ProjectName_Timestamp.md')
+        output_layout.addWidget(self.output_file_input)
+        self.output_file_button = QPushButton('Browse')
+        self.output_file_button.clicked.connect(self.select_output_file)
+        output_layout.addWidget(self.output_file_button)
+        form_layout.addLayout(output_layout)
+
         layout.addLayout(form_layout)
 
-        self.select_button = QPushButton('Select Folder')
-        self.select_button.clicked.connect(self.select_folder)
-        layout.addWidget(self.select_button)
+        self.start_button = QPushButton('Start Process')
+        self.start_button.clicked.connect(self.start_process)
+        layout.addWidget(self.start_button)
 
         self.progress_bar = QProgressBar()
         layout.addWidget(self.progress_bar)
 
         self.setLayout(layout)
-        self.setWindowTitle('AICodeMerge GUI')
-        self.setGeometry(300, 300, 500, 400)
+        self.setWindowTitle('AICodeMerge')
+        self.setGeometry(300, 300, 600, 500)  # Increased height to accommodate new elements
+
+    def set_folder(self, folder):
+        self.selected_folder = folder
+        self.dropzone.set_folder(folder)
 
     def select_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
         if folder:
-            self.process_folder(folder)
-            
+            self.set_folder(folder)
+
+    def remove_folder(self):
+        self.selected_folder = None
+        self.dropzone.clear_folder()
+
     def reset_exclude_patterns(self):
-        self.exclude_input.setText(','.join(DEFAULT_EXCLUDE_PATTERNS))
+        self.exclude_input.setPlainText('\n'.join(DEFAULT_EXCLUDE_PATTERNS))
+
+    def select_output_file(self):
+        file_name, _ = QFileDialog.getSaveFileName(self, "Select Output File", "", "Markdown Files (*.md);;All Files (*)")
+        if file_name:
+            self.custom_output_file = file_name
+            self.output_file_input.setText(file_name)
+
+    def start_process(self):
+        if not self.selected_folder:
+            QMessageBox.warning(self, "No Folder Selected", "Please select a project folder before starting the process.")
+            return
+
+        self.process_folder(self.selected_folder)
 
     def process_folder(self, folder_path):
         if not os.access(folder_path, os.R_OK):
@@ -251,22 +307,26 @@ class AICodeMergeGUI(QWidget):
         max_depth = self.max_depth_input.value()
         max_size = self.max_size_input.value()
         patterns = [p.strip() for p in self.patterns_input.text().split(',')]
-        exclude_patterns = [p.strip() for p in self.exclude_input.text().split(',')]
+        exclude_patterns = [p.strip() for p in self.exclude_input.toPlainText().split('\n') if p.strip()]
+
+        # Determine output file
+        if self.custom_output_file:
+            output_file = self.custom_output_file
+        else:
+            project_name = os.path.basename(os.path.abspath(folder_path))
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = f"{project_name}_{timestamp}.md"
 
         self.progress_bar.setValue(0)
 
         try:
-            self.run_aicodemerge(folder_path, max_depth, max_size, patterns, exclude_patterns)
+            self.run_aicodemerge(folder_path, output_file, max_depth, max_size, patterns, exclude_patterns)
             self.progress_bar.setValue(100)
-            QMessageBox.information(self, "Process Complete", "AICodeMerge has finished processing the folder.")
+            QMessageBox.information(self, "Process Complete", f"AICodeMerge has finished processing the folder.\nOutput file: {output_file}")
         except Exception as e:
             QMessageBox.critical(self, "Processing Error", f"An error occurred while processing: {str(e)}")
 
-    def run_aicodemerge(self, project_path, max_depth, max_size, patterns, exclude_patterns):
-        project_name = os.path.basename(os.path.abspath(project_path))
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"{project_name}_{timestamp}.md"
-        
+    def run_aicodemerge(self, project_path, output_file, max_depth, max_size, patterns, exclude_patterns):
         gitignore_matcher = parse_gitignore(os.path.join(project_path, '.gitignore'), exclude_patterns)
         
         with open(output_file, "w", encoding="utf-8") as out:
@@ -310,6 +370,7 @@ class AICodeMergeGUI(QWidget):
 
         print(f"Markdown file created: {output_file}")
         print(f"Location: {os.path.abspath(output_file)}")
+        return output_file
 
 def main():
     app = QApplication(sys.argv)

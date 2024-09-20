@@ -8,12 +8,12 @@ AI Code Merge is a tool for concatenating codebases and preparing them for input
 - Support for various file types
 - Customizable file inclusion/exclusion
 - Command-line interface
-- Simple graphical user interface (early phase, incomplete)
+- Graphical user interface
 
 ## Components
 
 1. `aicodemerge.py`: Core script for merging code files (CLI functionality)
-2. `aicodemerge-gui.py`: Graphical interface for the AI Code Merge tool (early phase, incomplete)
+2. `aicodemerge-gui.py`: Graphical interface for the AI Code Merge tool
 
 ## Installation
 
@@ -53,19 +53,20 @@ Example:
 python aicodemerge.py -d 4 -s 100 -p "*.py,*.js" -o output.md ./project
 ```
 
-### Graphical User Interface (Early Phase)
-
-The GUI is currently in an early development phase and is incomplete. Basic functionality includes:
+### Graphical User Interface
 
 Run:
 ```
 python aicodemerge-gui.py
 ```
 
-- Select a project folder
+Features:
+- Select or drag and drop a project folder
+- Set maximum directory depth and file size
+- Specify file patterns to include
+- Customize exclude patterns
+- Choose output file location
 - Process the folder and generate output
-
-Note: The GUI version is still under development and may lack features or stability compared to the CLI version.
 
 ## License
 

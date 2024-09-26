@@ -54,7 +54,7 @@ DEFAULT_EXCLUDE_PATTERNS = [
 
     # Media and Archives
     '*.jpg', '*.jpeg', '*.png', '*.gif', '*.ico', '*.mov', '*.mp4', '*.mp3',
-    '*.flv', '*.fla', '*.zip', '*.tar.gz', '*.rar',
+    '*.flv', '*.fla', '*.zip', '*.tar.gz', '*.rar', '*.svg',
 
     # Configuration and Environment Files
     '.env', '.env.*', 'config.json', 'settings.json',
